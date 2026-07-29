@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<meta name="theme-color" content="#4ade22">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Mi Reseller Program — Dashboard</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="assets/logo.png">
+<link rel="icon" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Sora:wght@400;500;600;700&family=Fira+Code:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/theme.css">
+<style>
+html,body{overflow:hidden}
+</style>
+</head>
+<body class="t-green">
+<div class="bg"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div></div>
+<div id="ldr"><img src="assets/logo.png" class="li" alt="Mi Reseller"><div class="lr"></div><div class="lt">LOADING</div></div>
+
+<!-- PIN -->
+<div class="pin-ov" id="pinOv">
+  <div class="pin-box">
+    <img src="assets/logo.png" style="width:48px;display:block;margin:0 auto .7rem;filter:drop-shadow(0 0 12px var(--g))">
+    <div style="font-family:'Orbitron',monospace;font-size:.65rem;letter-spacing:2px;color:var(--g);text-align:center">PIN DARJ KAREIN</div>
+    <div class="pin-dots"><div class="pd" id="pd0"></div><div class="pd" id="pd1"></div><div class="pd" id="pd2"></div><div class="pd" id="pd3"></div></div>
+    <div class="pgrid" id="pgrid"></div>
+    <div id="perr" style="font-size:.7rem;color:var(--r);text-align:center;min-height:1em;margin-top:.55rem"></div>
+    <button onclick="skipP()" style="width:100%;margin-top:.72rem;padding:.55rem;background:rgba(255,255,255,.04);border:1px solid var(--bd);border-radius:var(--r3);color:var(--t2);font-size:.7rem;cursor:pointer;font-family:'Sora',sans-serif">⏭ Pehli Baar Skip</button>
+  </div>
+</div>
+
+<!-- Client Detail Modal -->
+<div class="mo-ov" id="moD">
+  <div class="mo-box">
+    <div class="mo-hd"><div class="mo-ttl">👤 Client Detail</div><button class="mo-cl" onclick="cM('moD')">✕</button></div>
+    <div class="mo-body" id="moDB"></div>
+    <div class="mo-foot" id="moDFt"></div>
+  </div>
+</div>
+
+<!-- Client EDIT Modal -->
+<div class="mo-ov" id="moEC">
+  <div class="mo-box">
+    <div class="mo-hd"><div class="mo-ttl">✏️ Client Edit</div><button class="mo-cl" onclick="cM('moEC')">✕</button></div>
+    <div class="mo-body">
+      <div class="alert ae" id="ecErr"></div>
+      <div class="fg"><label class="fl">Naam</label><span class="fic">👤</span><input class="fi" id="ec_nm" placeholder="Client naam"></div>
+      <div class="fg"><label class="fl">Phone</label><span class="fic">📞</span><input class="fi" id="ec_ph" placeholder="03XX-XXXXXXX"></div>
+      <div class="fg"><label class="fl">Notes</label><span class="fic">📝</span><input class="fi" id="ec_nt" placeholder="Notes..."></div>
+      <div class="fg"><label class="fl">Status</label>
+        <select class="fi-sel fi" id="ec_st" style="padding-left:.95rem">
+          <option value="Paid">✅ Paid</option>
+          <option value="Blocked">🚫 Blocked</option>
+        </select>
+      </div>
+      <input type="hidden" id="ec_uid">
+    </div>
+    <div class="mo-foot"><button class="btn bg-ghost bsm" onclick="cM('moEC')">Cancel</button><button class="btn bg-gold bsm" onclick="saveClientEdit()">💾 Save</button></div>
+  </div>
+</div>
+
+<!-- Success Modal -->
+<div class="mo-ov" id="moS">
+  <div class="mo-box">
+    <div class="mo-hd"><div class="mo-ttl">✅ Client Deployed!</div><button class="mo-cl" onclick="cM('moS')">✕</button></div>
+    <div class="mo-body" id="moSB"></div>
+    <div class="mo-foot"><button class="btn bg-ghost bsm" onclick="cM('moS')">Close</button><button class="btn bg-green bsm" id="waBtn">📲 WhatsApp</button></div>
+  </div>
+</div>
+
+<!-- Profile Edit Modal -->
+<div class="mo-ov" id="moPro">
+  <div class="mo-box">
+    <div class="mo-hd"><div class="mo-ttl">✏️ Profile Edit</div><button class="mo-cl" onclick="cM('moPro')">✕</button></div>
+    <div class="mo-body">
+      <div class="alert ae" id="proErr"></div>
+      <div class="avatar-up" id="proAvatar" style="margin-bottom:1.1rem"><span>👤</span><div class="cam">📷</div></div>
+      <div class="fg"><label class="fl">Email</label><span class="fic">📧</span><input class="fi" type="email" id="pro_em" placeholder="email@example.com"></div>
+      <div class="fg"><label class="fl">Naya Password (optional)</label><span class="fic">🔒</span><input class="fi" type="password" id="pro_pw" placeholder="Khali rakhein — same rahega"></div>
+      <div class="fg"><label class="fl">App PIN (4 digit)</label><span class="fic">🔢</span><input class="fi" type="password" id="pro_pin" placeholder="Naya PIN (khali rakhein — same)" maxlength="4"></div>
+      <div class="fg" style="margin-bottom:.3rem">
+        <label class="fl">📍 Location</label>
+        <button type="button" class="btn bg-ghost bfull bsm" onclick="openProLocation()">📍 Location Update Karein</button>
+        <div id="proLocPreview" style="font-size:.7rem;color:var(--t2);margin-top:.4rem"></div>
+      </div>
+    </div>
+    <div class="mo-foot"><button class="btn bg-ghost bsm" onclick="cM('moPro')">Cancel</button><button class="btn bg-gold bsm" onclick="saveProfile()">💾 Save</button></div>
+  </div>
+</div>
+
+<!-- Chat with Resellers Modal (R2R) -->
+<div class="mo-ov" id="moR2R">
+  <div class="mo-box" style="max-height:85dvh">
+    <div class="mo-hd"><div class="mo-ttl">💬 Reseller Se Chat</div><button class="mo-cl" onclick="cM('moR2R')">✕</button></div>
+    <div class="mo-body" id="r2rList" style="padding:.5rem"></div>
+  </div>
+</div>
+
+<!-- Location picker modal (profile) -->
+<div class="mo-ov" id="moLocPro">
+  <div class="mo-box">
+    <div class="mo-hd"><div class="mo-ttl">📍 Location Select Karein</div><button class="mo-cl" onclick="cM('moLocPro')">✕</button></div>
+    <div class="mo-body"><div class="map-box" id="mapProBox"></div></div>
+    <div class="mo-foot"><button class="btn bg-ghost bsm" onclick="cM('moLocPro')">Cancel</button><button class="btn bg-gold bsm" onclick="confirmProLocation()">✅ Confirm</button></div>
+  </div>
+</div>
+
+<!-- Add / Edit Product Modal (Marketplace) -->
+<div class="mo-ov" id="moProd">
+  <div class="mo-box">
+    <div class="mo-hd"><div class="mo-ttl" id="prodModalTtl">🛍️ New Listing</div><button class="mo-cl" onclick="cM('moProd')">✕</button></div>
+    <div class="mo-body">
+      <div class="alert ae" id="prodErr"></div>
+      <div class="img-up" id="prodImgUp" style="margin-bottom:1rem"><span>🖼️ Product Image</span></div>
+      <div class="fg"><label class="fl">Title *</label><span class="fic">🏷️</span><input class="fi" id="pd_title" placeholder="Product / Service naam"></div>
+      <div class="fg"><label class="fl">Price (Rs) *</label><span class="fic">💰</span><input class="fi" type="number" id="pd_price" placeholder="1500"></div>
+      <div class="fg"><label class="fl">Description</label><span class="fic">📝</span><input class="fi" id="pd_desc" placeholder="Details, features..."></div>
+      <div class="fg"><label class="fl">Category</label>
+        <select class="fi-sel fi" id="pd_cat" style="padding-left:.95rem">
+          <option>IPTV Subscription</option><option>Device / Hardware</option><option>Accessories</option><option>Service</option><option>Other</option>
+        </select>
+      </div>
+      <input type="hidden" id="pd_id">
+    </div>
+    <div class="mo-foot"><button class="btn bg-ghost bsm" onclick="cM('moProd')">Cancel</button><button class="btn bg-gold bsm" onclick="saveProduct()">💾 Save Listing</button></div>
+  </div>
+</div>
+
+<!-- Product Detail Modal -->
+<div class="mo-ov" id="moProdD">
+  <div class="mo-box">
+    <div class="mo-hd"><div class="mo-ttl">🛍️ Listing Detail</div><button class="mo-cl" onclick="cM('moProdD')">✕</button></div>
+    <div class="mo-body" id="moProdDB"></div>
+    <div class="mo-foot" id="moProdDFt"></div>
+  </div>
+</div>
+
+<!-- Checkout / Payment Modal -->
+<div class="mo-ov" id="moPay">
+  <div class="mo-box">
+    <div class="mo-hd"><div class="mo-ttl">💳 Payment Karein</div><button class="mo-cl" onclick="cM('moPay')">✕</button></div>
+    <div class="mo-body" id="moPayB"></div>
+    <div class="mo-foot"><button class="btn bg-ghost bsm" onclick="cM('moPay')">Close</button></div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<div class="app">
+  <div class="topbar">
+    <div class="tb-left">
+      <img src="assets/logo.png" class="tb-img" alt="Mi Reseller">
+      <span class="tb-name">MI RESELLER</span>
+    </div>
+    <div class="tb-right">
+      <span class="tb-user" id="tbU">—</span>
+      <div class="dot" id="netDot"></div>
+      <button onclick="toggleSound()" id="sndBtn" style="background:none;border:none;color:var(--t2);cursor:pointer;font-size:.88rem;padding:.15rem;line-height:1">🔊</button>
+    </div>
+  </div>
+
+  <div class="scroll" id="scrl">
+
+    <!-- HOME -->
+    <div class="pg on" id="pg-home">
+      <div style="display:flex;align-items:center;gap:.6rem;padding:.2rem 0 .75rem">
+        <div style="flex:1"><div style="font-size:.68rem;color:var(--t2)">Assalam o Alaikum,</div><div style="font-size:1rem;font-weight:700" id="hWel">—</div></div>
+        <div style="font-family:'Orbitron',monospace;font-size:.68rem;color:var(--t2)" id="hClk">--:--</div>
+      </div>
+      <div class="sg">
+        <div class="card lg sc"><div class="sc-i">👥</div><div class="sc-n cg" id="stT">—</div><div class="sc-l">Clients</div><div class="sc-g">👥</div></div>
+        <div class="card lc sc"><div class="sc-i">✅</div><div class="sc-n cc" id="stP">—</div><div class="sc-l">Paid</div><div class="sc-g">✅</div></div>
+        <div class="card lr2 sc"><div class="sc-i">🚫</div><div class="sc-n cr" id="stB">—</div><div class="sc-l">Blocked</div><div class="sc-g">🚫</div></div>
+        <div class="card lgr sc"><div class="sc-i">💎</div><div class="sc-n cgr" id="stCR">—</div><div class="sc-l">Credits</div><div class="sc-g">💎</div></div>
+      </div>
+      <div class="card lg" style="margin-bottom:.9rem">
+        <div class="rev-row"><span class="rl">Monthly (Paid × Rs 300)</span><span class="rv" id="rM">—</span></div>
+        <div class="rev-row"><span class="rl">Setup (Total × Rs 100)</span><span class="rv" id="rS">—</span></div>
+        <div class="rev-row"><span class="rl" style="color:var(--g2);font-weight:600">Total Estimated</span><span class="rv big" id="rT">—</span></div>
+      </div>
+      <div class="sh"><div class="sht">🏆 Performance Score</div></div>
+      <div class="card lp" style="padding:.9rem;margin-bottom:.9rem">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+          <div style="font-size:.78rem;color:var(--t2)">Paid Rate</div>
+          <div style="font-family:'Orbitron',monospace;font-size:1rem;font-weight:700;color:var(--p)" id="scoreNum">—</div>
+        </div>
+        <div class="score-bar"><div class="score-fill" id="scoreFill" style="width:0%"></div></div>
+        <div style="font-size:.66rem;color:var(--t3);margin-top:.4rem" id="scoreLbl">—</div>
+      </div>
+      <div class="sh"><div class="sht">📋 Recent Clients</div><button class="btn bg-ghost bsm" onclick="gp('clients')">All →</button></div>
+      <div class="card" id="recList"><div class="empty"><div class="empty-i">⏳</div></div></div>
+      <div class="sh"><div class="sht">📊 Activity Log</div></div>
+      <div class="card" id="activityLog"><div class="empty"><div class="empty-i">📊</div><div>Koi activity nahi</div></div></div>
+    </div>
+
+    <!-- CLIENTS -->
+    <div class="pg" id="pg-clients">
+      <div class="srch-wrap"><span class="srch-ic">🔍</span><input class="srch" type="search" id="cF" placeholder="Naam, phone ya UID..." oninput="fC()"></div>
+      <div style="display:flex;gap:.4rem;margin-bottom:.85rem">
+        <button class="bsm btn bg-gold" style="flex:1" onclick="setFilter('all')" id="fb-all">All</button>
+        <button class="bsm btn bg-ghost" style="flex:1" onclick="setFilter('paid')" id="fb-paid">✅ Paid</button>
+        <button class="bsm btn bg-ghost" style="flex:1" onclick="setFilter('block')" id="fb-block">🚫 Block</button>
+      </div>
+      <div class="card" id="allList"><div class="empty"><div class="empty-i">⏳</div></div></div>
+    </div>
+
+    <!-- ADD CLIENT -->
+    <div class="pg" id="pg-add">
+      <div class="card lg" style="padding:1.25rem">
+        <div style="font-family:'Orbitron',monospace;font-size:.58rem;letter-spacing:2px;color:var(--g);margin-bottom:1rem">➕ NEW CLIENT DEPLOY</div>
+        <div class="alert ae" id="addErr"></div>
+        <div class="fg"><label class="fl">Naam *</label><span class="fic">👤</span><input class="fi" type="text" id="nn" placeholder="Muhammad Ahmed"></div>
+        <div class="fg"><label class="fl">Phone / WhatsApp *</label><span class="fic">📞</span><input class="fi" type="tel" id="np" placeholder="03XX-XXXXXXX" inputmode="tel"></div>
+        <div class="fg"><label class="fl">Notes</label><span class="fic">📝</span><input class="fi" id="nnote" placeholder="City, package, remarks..."></div>
+        <div class="cost-box">
+          <div class="cost-t">💰 COST BREAKDOWN</div>
+          <div class="cost-r"><span class="cost-lbl">Monthly Fee</span><span class="cost-val">Rs 300</span></div>
+          <div class="cost-r"><span class="cost-lbl">Setup Fee (1x)</span><span class="cost-val">Rs 100</span></div>
+          <div class="cost-r" style="border-top:1px solid var(--bd);padding-top:.35rem;margin-top:.2rem"><span class="cost-lbl" style="color:var(--g2);font-weight:600">1st Month Total</span><span class="cost-val" style="font-size:.95rem">Rs 400</span></div>
+        </div>
+        <button class="btn bg-gold bfull" id="addBtn" onclick="addCli()" style="padding:.8rem;font-family:'Orbitron',monospace;font-size:.7rem;letter-spacing:2.5px;margin-top:.2rem">⚡ DEPLOY CLIENT</button>
+      </div>
+    </div>
+
+    <!-- MARKETPLACE -->
+    <div class="pg" id="pg-market">
+      <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.85rem">
+        <div class="srch-wrap" style="flex:1;margin-bottom:0"><span class="srch-ic">🔍</span><input class="srch" type="search" id="mF" placeholder="Product dhoondein..." oninput="fMarket()"></div>
+        <button class="btn bg-gold bsm" onclick="openNewProduct()">➕ Sell</button>
+      </div>
+      <div class="sh"><div class="sht">🛍️ Marketplace</div></div>
+      <div class="prod-grid" id="marketGrid"></div>
+      <div class="sh"><div class="sht">📦 Meri Listings</div></div>
+      <div class="card" id="myListings"><div class="empty"><div class="empty-i">📭</div><div>Koi listing nahi</div></div></div>
+    </div>
+
+    <!-- CHAT (Admin + R2R) -->
+    <div class="pg no-pad" id="pg-chat">
+      <div class="chat-shell">
+        <div class="chat-hdr">
+          <div class="mav mav-g" style="width:32px;height:32px" id="chatHdrAv">👑</div>
+          <div style="flex:1">
+            <div style="font-weight:700;font-size:.86rem" id="chatHdrNm">Admin — Muaaz Iqbal</div>
+            <div style="font-size:.66rem;color:var(--t2)" id="chatHdrSub">Kasur, Punjab · Realtime Chat</div>
+          </div>
+          <label style="background:rgba(255,255,255,.06);border:1px solid var(--bd);border-radius:var(--r3);padding:.3rem .5rem;cursor:pointer;font-size:.72rem;color:var(--t2)" for="chatImgUp">🖼️</label>
+          <input type="file" id="chatImgUp" accept="image/*" style="display:none" onchange="sendChatImg()">
+          <div class="dot"></div>
+        </div>
+        <div class="chat-type-tabs">
+          <button class="ct-tab on" id="ct-admin" onclick="switchChatType('admin')">👑 Admin Chat</button>
+          <button class="ct-tab" id="ct-r2r" onclick="openR2R()">🧑‍💼 Resellers</button>
+        </div>
+        <div class="chat-msgs" id="chatMsgs"></div>
+        <div class="chat-foot">
+          <textarea class="chat-ta" id="chatIn" placeholder="Message likhein..." rows="1" oninput="arSz(this)" onkeydown="ckSend(event)"></textarea>
+          <button class="btn bg-gold sbtn" onclick="sChat()">➤</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI -->
+    <div class="pg no-pad" id="pg-ai">
+      <div class="chat-shell">
+        <div class="chat-hdr">
+          <div class="mav mav-p" style="width:32px;height:32px">🧠</div>
+          <div style="flex:1"><div style="font-weight:700;font-size:.86rem">Mi AI</div><div style="font-size:.65rem;color:var(--p)" id="aiModelLbl">Groq · Mini Model</div></div>
+          <button class="btn bg-ghost bsm" onclick="clrAI()">🗑</button>
+        </div>
+        <div class="model-sw">
+          <button class="model-btn on" id="mdl-mini" onclick="setAIModel('mini')">⚡ MINI · Fast</button>
+          <button class="model-btn" id="mdl-long" onclick="setAIModel('long')">🧠 LONG · Smart</button>
+        </div>
+        <div class="chat-msgs" id="aiMsgs"></div>
+        <div class="chat-foot">
+          <textarea class="chat-ta" id="aiIn" placeholder="Kuch bhi poochho..." rows="1" oninput="arSz(this)" onkeydown="akSend(event)"></textarea>
+          <button class="btn bg-purple sbtn" onclick="sAI()">➤</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="pg" id="pg-about">
+      <div class="card lg" style="padding:1.2rem;margin-bottom:.85rem;text-align:center">
+        <div class="avatar-up" id="aboutAvatar" style="cursor:default;margin-bottom:.7rem"><span>👤</span></div>
+        <div style="font-family:'Orbitron',monospace;font-size:1rem;font-weight:900;letter-spacing:3px;background:linear-gradient(90deg,var(--g3),var(--g2),var(--c));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">MI RESELLER</div>
+        <div style="font-size:.65rem;color:var(--t2);margin-top:.28rem;letter-spacing:2px">JOIN · EARN · GROW</div>
+      </div>
+      <div class="sh"><div class="sht">🎨 Theme</div></div>
+      <div class="card lp" style="padding:.9rem;margin-bottom:.85rem;text-align:center">
+        <div class="th-strip">
+          <button class="th-d" data-t="t-green" onclick="setTheme('t-green')" title="Mi Green"></button>
+          <button class="th-d" data-t="t-royal" onclick="setTheme('t-royal')" title="Royal Purple"></button>
+          <button class="th-d" data-t="t-ocean" onclick="setTheme('t-ocean')" title="Deep Ocean"></button>
+          <button class="th-d" data-t="t-rose" onclick="setTheme('t-rose')" title="Rose Fire"></button>
+          <button class="th-d" data-t="t-gold" onclick="setTheme('t-gold')" title="Gold"></button>
+        </div>
+        <div id="themeLabel" style="font-size:.68rem;color:var(--t2)">Mi Green</div>
+      </div>
+      <div class="sh"><div class="sht">👤 My Account</div><button class="btn bg-ghost bsm" onclick="oM('moPro')">✏️ Edit</button></div>
+      <div class="card lc" style="margin-bottom:.85rem;padding:.3rem .9rem">
+        <div class="about-row"><span class="about-ic">🧑‍💼</span><div><div class="about-lbl">Name</div><div class="about-val" id="abN">—</div></div></div>
+        <div class="about-row"><span class="about-ic">🆔</span><div><div class="about-lbl">Reseller ID</div><div class="about-val" id="abI" style="font-family:'Fira Code',monospace;font-size:.78rem;color:var(--bl)">—</div></div></div>
+        <div class="about-row"><span class="about-ic">📞</span><div><div class="about-lbl">Phone</div><div class="about-val" id="abP">—</div></div></div>
+        <div class="about-row"><span class="about-ic">📧</span><div><div class="about-lbl">Email</div><div class="about-val" id="abEM">—</div></div></div>
+        <div class="about-row"><span class="about-ic">📍</span><div><div class="about-lbl">Location</div><div class="about-val" id="abLoc" style="font-size:.74rem">—</div></div></div>
+        <div class="about-row"><span class="about-ic">💎</span><div><div class="about-lbl">Credits</div><div class="about-val" id="abCR" style="color:var(--c)">—</div></div></div>
+      </div>
+      <div class="sh"><div class="sht">💰 Revenue</div></div>
+      <div class="card lg" style="margin-bottom:.85rem">
+        <div class="rev-row"><span class="rl">Monthly (Paid × Rs 300)</span><span class="rv" id="abRM">—</span></div>
+        <div class="rev-row"><span class="rl">Setup (Total × Rs 100)</span><span class="rv" id="abRS">—</span></div>
+        <div class="rev-row"><span class="rl" style="color:var(--g2);font-weight:600">Total Estimated</span><span class="rv big" id="abRT">—</span></div>
+      </div>
+      <div class="sh"><div class="sht">💳 Mera Payment Karein (Renewal / Credits)</div></div>
+      <div class="card lp" style="margin-bottom:.85rem;padding:1.1rem">
+        <div style="font-size:.75rem;color:var(--t2);margin-bottom:.75rem;line-height:1.6">Monthly renewal, credits ya services ke liye JazzCash/EasyPaisa se payment karein.</div>
+        <button class="btn bg-purple bfull" onclick="openPaymentModal()">💳 Payment Options Dekhein</button>
+      </div>
+      <div class="sh"><div class="sht">📲 App Install</div></div>
+      <div class="card lp" style="margin-bottom:.85rem;padding:1.1rem">
+        <div style="display:flex;align-items:center;gap:.85rem;margin-bottom:.85rem"><span style="font-size:1.8rem">📱</span><div><div style="font-weight:600;font-size:.86rem">Mi Reseller App Install Karein</div><div style="font-size:.72rem;color:var(--t2)">Home screen pe fast access</div></div></div>
+        <button class="btn bg-purple bfull" onclick="doInstall()" id="pwaBtn" style="font-family:'Orbitron',monospace;font-size:.7rem;letter-spacing:1.5px">📲 INSTALL NOW</button>
+        <div id="pwaOk" style="display:none;text-align:center;font-size:.76rem;color:var(--gr2);margin-top:.65rem">✅ Already installed</div>
+      </div>
+      <button class="btn bg-red bfull" onclick="doLogout()" style="margin-bottom:1.5rem;padding:.8rem;font-family:'Orbitron',monospace;font-size:.7rem;letter-spacing:2px">🚪 LOGOUT</button>
+    </div>
+
+  </div>
+
+  <div class="bnav">
+    <button class="bni on" data-pg="home" onclick="gp('home')"><span class="bni-ic">🏠</span><span class="bni-lb">Home</span></button>
+    <button class="bni" data-pg="clients" onclick="gp('clients')"><span class="bni-ic">👥</span><span class="bni-lb">Clients</span></button>
+    <button class="bni" data-pg="add" onclick="gp('add')"><span class="bni-ic">➕</span><span class="bni-lb">Add</span></button>
+    <button class="bni" data-pg="market" onclick="gp('market')"><span class="bni-ic">🛍️</span><span class="bni-lb">Market</span></button>
+    <button class="bni" data-pg="chat" onclick="gp('chat')">
+      <span class="bni-ic" style="position:relative">💬<span class="chat-badge" id="chatBadge"></span></span>
+      <span class="bni-lb">Chat</span>
+    </button>
+    <button class="bni" data-pg="ai" onclick="gp('ai')"><span class="bni-ic">🧠</span><span class="bni-lb">Mi AI</span></button>
+    <button class="bni" data-pg="about" onclick="gp('about')"><span class="bni-ic">👤</span><span class="bni-lb">Profile</span></button>
+  </div>
+</div>
+
+<script src="js/sounds.js"></script>
+<script type="module" src="js/dashboard-app.js"></script>
+<style>@keyframes scur{0%,100%{opacity:1}50%{opacity:0}}</style>
+</body>
+</html>

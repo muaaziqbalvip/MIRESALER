@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<meta name="theme-color" content="#4ade22">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Mi Reseller Program — Admin Panel</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="assets/logo.png">
+<link rel="icon" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Sora:wght@400;500;600;700&family=Fira+Code:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/theme.css">
+<style>
+html,body{overflow:hidden}
+.chat-subhdr{padding:.5rem .85rem;border-bottom:1px solid var(--bd);display:flex;gap:.4rem;overflow-x:auto;flex-shrink:0;background:rgba(0,0,0,.8);-webkit-overflow-scrolling:touch}
+.chat-subhdr::-webkit-scrollbar{display:none}
+.rsel-btn{flex-shrink:0;padding:.3rem .72rem;border:1px solid var(--bd);border-radius:20px;background:transparent;color:var(--t2);font-size:.7rem;cursor:pointer;white-space:nowrap;transition:all .18s;font-family:'Sora',sans-serif}
+.rsel-btn.on{background:rgba(74,222,34,.14);border-color:var(--bdg);color:var(--g)}
+.msg-acts{display:flex;gap:4px;margin-top:3px}
+.ma-btn{background:rgba(255,255,255,.06);border:1px solid var(--bd);border-radius:5px;padding:2px 6px;font-size:.62rem;color:var(--t2);cursor:pointer;transition:all .14s}
+.ma-btn:hover{color:var(--t1);background:rgba(255,255,255,.1)}
+.mbar{height:6px;border-radius:3px;background:rgba(255,255,255,.06);margin-top:.3rem;overflow:hidden}
+.mbar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--g3),var(--g2));transition:width .6s var(--ease)}
+.mon-row{display:flex;align-items:center;justify-content:space-between;padding:.6rem .9rem;border-bottom:1px solid var(--bd)}.mon-row:last-child{border-bottom:none}
+.top-card{background:linear-gradient(135deg,rgba(74,222,34,.1),rgba(61,220,151,.06));border:1px solid var(--bdg);border-radius:var(--r2);padding:.85rem 1rem;margin-bottom:.65rem;position:relative;overflow:hidden}
+.top-card::after{content:'🏆';position:absolute;right:.7rem;bottom:.1rem;font-size:2.5rem;opacity:.1}
+.req-dot{position:absolute;top:4px;right:calc(50% - 16px);width:7px;height:7px;border-radius:50%;background:var(--r);display:none}
+.tb-n{font-family:'Orbitron',monospace;font-size:.78rem;font-weight:700;letter-spacing:1.5px;color:var(--g)}
+.tb-s{font-size:.6rem;color:var(--t2)}
+</style>
+</head>
+<body class="t-green">
+<div class="bg"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div></div>
+<div id="ldr"><img src="assets/logo.png" class="li"><div class="lr"></div><div class="lt">ADMIN</div></div>
+
+<div class="pin-ov on" id="pinOv">
+  <div class="pin-box">
+    <img src="assets/logo.png" style="width:48px;display:block;margin:0 auto .7rem;filter:drop-shadow(0 0 12px var(--g))">
+    <div style="font-family:'Orbitron',monospace;font-size:.65rem;letter-spacing:2px;color:var(--g);text-align:center">ADMIN ACCESS</div>
+    <div class="pin-dots"><div class="pd" id="pd0"></div><div class="pd" id="pd1"></div><div class="pd" id="pd2"></div><div class="pd" id="pd3"></div></div>
+    <div class="pgrid" id="pgrid"></div>
+    <div id="perr" style="font-size:.7rem;color:var(--r);text-align:center;min-height:1em;margin-top:.55rem"></div>
+    <button onclick="doGoogleAdminLogin()" style="width:100%;margin-top:.7rem;padding:.55rem;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:var(--r3);color:var(--t1);font-size:.7rem;cursor:pointer;font-family:'Sora',sans-serif;display:flex;align-items:center;justify-content:center;gap:.5rem">
+      <svg width="14" height="14" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+      Google Login (Admin Email)
+    </button>
+  </div>
+</div>
+
+<!-- Add Reseller -->
+<div class="mo-ov" id="moAR"><div class="mo-box">
+  <div class="mo-hd"><div class="mo-ttl">➕ Add Reseller</div><button class="mo-cl" onclick="cM('moAR')">✕</button></div>
+  <div class="mo-body"><div class="alert ae" id="arE"></div>
+    <div class="fg"><label class="fl">Naam *</label><span class="fic">👤</span><input class="fi" id="ar_n" placeholder="Muhammad Ali"></div>
+    <div class="fg"><label class="fl">Phone *</label><span class="fic">📞</span><input class="fi" type="tel" id="ar_p" placeholder="03XX-XXXXXXX"></div>
+    <div class="fg"><label class="fl">Email</label><span class="fic">📧</span><input class="fi" type="email" id="ar_em" placeholder="email@example.com"></div>
+    <div class="fg"><label class="fl">City</label><span class="fic">📍</span><input class="fi" id="ar_c" placeholder="Lahore"></div>
+    <div class="fg"><label class="fl">Password *</label><span class="fic">🔒</span><input class="fi" type="password" id="ar_w" placeholder="Min 4 chars"></div>
+    <div class="fg"><label class="fl">Credits</label><span class="fic">💎</span><input class="fi" type="number" id="ar_cr" placeholder="50" style="padding-left:2.6rem"></div>
+  </div>
+  <div class="mo-foot"><button class="btn bg-ghost bsm" onclick="cM('moAR')">Cancel</button><button class="btn bg-gold bsm" id="arBtn" onclick="addRes()">✅ Add</button></div>
+</div></div>
+
+<!-- Edit Reseller -->
+<div class="mo-ov" id="moER"><div class="mo-box">
+  <div class="mo-hd"><div class="mo-ttl">✏️ Edit Reseller</div><button class="mo-cl" onclick="cM('moER')">✕</button></div>
+  <div class="mo-body"><div class="alert ae" id="erE"></div>
+    <div class="fg"><label class="fl">Naam</label><span class="fic">👤</span><input class="fi" id="er_n"></div>
+    <div class="fg"><label class="fl">Phone</label><span class="fic">📞</span><input class="fi" type="tel" id="er_p"></div>
+    <div class="fg"><label class="fl">Email</label><span class="fic">📧</span><input class="fi" type="email" id="er_em"></div>
+    <div class="fg"><label class="fl">City</label><span class="fic">📍</span><input class="fi" id="er_c"></div>
+    <div class="fg"><label class="fl">Password (khali=same)</label><span class="fic">🔒</span><input class="fi" type="password" id="er_w" placeholder="Naya password ya khali rakhein"></div>
+    <div class="fg"><label class="fl">Credits</label><span class="fic">💎</span><input class="fi" type="number" id="er_cr" style="padding-left:2.6rem"></div>
+    <div class="fg"><label class="fl">Status</label><select class="fi-sel fi" id="er_st" style="padding-left:.95rem"><option value="true">✅ Active</option><option value="false">🚫 Blocked</option></select></div>
+    <input type="hidden" id="er_id">
+  </div>
+  <div class="mo-foot"><button class="btn bg-ghost bsm" onclick="cM('moER')">Cancel</button><button class="btn bg-gold bsm" id="erBtn" onclick="saveEditRes()">💾 Save</button></div>
+</div></div>
+
+<!-- Reseller Detail -->
+<div class="mo-ov" id="moRD"><div class="mo-box">
+  <div class="mo-hd"><div class="mo-ttl">🧑‍💼 Reseller Detail</div><button class="mo-cl" onclick="cM('moRD')">✕</button></div>
+  <div class="mo-body" id="moRDB"></div>
+  <div class="mo-foot" id="moRDF"></div>
+</div></div>
+
+<!-- Reseller location map view -->
+<div class="mo-ov" id="moRLoc"><div class="mo-box">
+  <div class="mo-hd"><div class="mo-ttl">📍 Reseller Location</div><button class="mo-cl" onclick="cM('moRLoc')">✕</button></div>
+  <div class="mo-body"><div class="map-box" id="mapRLocBox"></div><div id="rLocAddr" class="map-addr"></div></div>
+</div></div>
+
+<!-- Edit Message -->
+<div class="mo-ov" id="moEM"><div class="mo-box">
+  <div class="mo-hd"><div class="mo-ttl">✏️ Message Edit/Delete</div><button class="mo-cl" onclick="cM('moEM')">✕</button></div>
+  <div class="mo-body">
+    <div class="alert ae" id="emE"></div>
+    <div class="fg"><label class="fl">Message Text</label><textarea class="fi" id="em_txt" rows="3" style="resize:none;padding-left:.95rem"></textarea></div>
+    <input type="hidden" id="em_path">
+  </div>
+  <div class="mo-foot">
+    <button class="btn bg-ghost bsm" onclick="cM('moEM')">Cancel</button>
+    <button class="btn bg-orange bsm" onclick="saveMsgEdit()">✏️ Edit</button>
+    <button class="btn bg-red bsm" onclick="delMsg()">🗑 Delete</button>
+  </div>
+</div></div>
+
+<!-- Product moderation detail -->
+<div class="mo-ov" id="moProdA"><div class="mo-box">
+  <div class="mo-hd"><div class="mo-ttl">🛍️ Listing Detail</div><button class="mo-cl" onclick="cM('moProdA')">✕</button></div>
+  <div class="mo-body" id="moProdAB"></div>
+  <div class="mo-foot" id="moProdAF"></div>
+</div></div>
+
+<!-- Settings -->
+<div class="mo-ov" id="moSet"><div class="mo-box">
+  <div class="mo-hd"><div class="mo-ttl">⚙️ Settings</div><button class="mo-cl" onclick="cM('moSet')">✕</button></div>
+  <div class="mo-body">
+    <div class="fg"><label class="fl">Admin PIN Change</label><input class="fi" id="set_pin" placeholder="4 digit naya PIN" maxlength="4" type="password" style="padding-left:.95rem"></div>
+    <button class="btn bg-gold bsm bfull" onclick="changePIN()" style="margin-bottom:1.1rem">🔑 PIN Badlein</button>
+
+    <div style="font-family:'Orbitron',monospace;font-size:.54rem;letter-spacing:2px;color:var(--t2);margin-bottom:.5rem">THEME</div>
+    <div style="text-align:center;margin-bottom:1.1rem">
+      <button class="th-d" data-t="t-green" onclick="setTheme('t-green')"></button>
+      <button class="th-d" data-t="t-royal" onclick="setTheme('t-royal')"></button>
+      <button class="th-d" data-t="t-ocean" onclick="setTheme('t-ocean')"></button>
+      <button class="th-d" data-t="t-rose" onclick="setTheme('t-rose')"></button>
+      <button class="th-d" data-t="t-gold" onclick="setTheme('t-gold')"></button>
+      <div style="text-align:center;font-size:.7rem;color:var(--t2);margin-top:.4rem" id="thNm">Mi Green</div>
+    </div>
+
+    <div style="font-family:'Orbitron',monospace;font-size:.54rem;letter-spacing:2px;color:var(--t2);margin-bottom:.6rem">💳 PAYMENT METHODS (Resellers ko dikhega)</div>
+
+    <div class="pay-opt on" style="cursor:default">
+      <div class="pico pay-jc">📱</div>
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem"><b style="font-size:.8rem">JazzCash</b><label style="display:flex;align-items:center;gap:.3rem;font-size:.68rem;color:var(--t2)"><input type="checkbox" id="pm_jc_on"> Enabled</label></div>
+        <input class="fi" id="pm_jc_num" placeholder="03XX-XXXXXXX" style="padding-left:.95rem;margin-bottom:.4rem;font-size:.8rem">
+        <input class="fi" id="pm_jc_name" placeholder="Account Title" style="padding-left:.95rem;font-size:.8rem">
+      </div>
+    </div>
+    <div class="pay-opt on" style="cursor:default">
+      <div class="pico pay-ep">💚</div>
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem"><b style="font-size:.8rem">EasyPaisa</b><label style="display:flex;align-items:center;gap:.3rem;font-size:.68rem;color:var(--t2)"><input type="checkbox" id="pm_ep_on"> Enabled</label></div>
+        <input class="fi" id="pm_ep_num" placeholder="03XX-XXXXXXX" style="padding-left:.95rem;margin-bottom:.4rem;font-size:.8rem">
+        <input class="fi" id="pm_ep_name" placeholder="Account Title" style="padding-left:.95rem;font-size:.8rem">
+      </div>
+    </div>
+    <div class="pay-opt on" style="cursor:default">
+      <div class="pico pay-bk">🏦</div>
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem"><b style="font-size:.8rem">Bank Transfer</b><label style="display:flex;align-items:center;gap:.3rem;font-size:.68rem;color:var(--t2)"><input type="checkbox" id="pm_bk_on"> Enabled</label></div>
+        <input class="fi" id="pm_bk_bank" placeholder="Bank Name" style="padding-left:.95rem;margin-bottom:.4rem;font-size:.8rem">
+        <input class="fi" id="pm_bk_title" placeholder="Account Title" style="padding-left:.95rem;margin-bottom:.4rem;font-size:.8rem">
+        <input class="fi" id="pm_bk_iban" placeholder="IBAN / Account Number" style="padding-left:.95rem;font-size:.8rem">
+      </div>
+    </div>
+    <button class="btn bg-gold bfull bsm" onclick="savePaymentMethods()" style="margin-top:.3rem">💾 Payment Methods Save Karein</button>
+  </div>
+</div></div>
+
+<div id="toasts"></div>
+
+<div class="app">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:.6rem">
+      <img src="assets/logo.png" class="tb-img">
+      <div><div class="tb-n">MI RESELLER ADMIN</div><div class="tb-s">Total Control</div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:.65rem">
+      <div class="dot" id="netDot"></div>
+      <div style="font-family:'Orbitron',monospace;font-size:.66rem;color:var(--t2)" id="clk">--:--</div>
+      <button onclick="toggleSound()" id="sndBtn" style="background:none;border:none;color:var(--t2);cursor:pointer;font-size:.88rem;padding:.15rem;line-height:1">🔊</button>
+      <button onclick="oM('moSet')" style="background:none;border:none;color:var(--t2);cursor:pointer;font-size:.88rem;padding:.15rem;line-height:1">⚙️</button>
+    </div>
+  </div>
+
+  <div class="scroll" id="scrl">
+    <!-- HOME -->
+    <div class="pg on" id="pg-home">
+      <div style="display:flex;align-items:center;gap:.7rem;padding:.2rem 0 .75rem">
+        <div class="cav cav-g" style="width:40px;height:40px">👑</div>
+        <div style="flex:1"><div style="font-size:.66rem;color:var(--t2)">Super Admin</div><div style="font-size:.96rem;font-weight:700">Muaaz Iqbal</div></div>
+        <div style="text-align:right"><div style="font-family:'Orbitron',monospace;font-size:.68rem;color:var(--t2)">KASUR</div><div style="font-size:.6rem;color:var(--t3)">Punjab, Pakistan</div></div>
+      </div>
+      <div id="topResCard" style="display:none" class="top-card">
+        <div style="font-family:'Orbitron',monospace;font-size:.52rem;letter-spacing:2px;color:var(--g);margin-bottom:.4rem">🏆 TOP RESELLER</div>
+        <div style="font-size:.88rem;font-weight:700" id="topResNm">—</div>
+        <div style="font-size:.7rem;color:var(--t2);margin-top:.15rem" id="topResSub">—</div>
+      </div>
+      <div class="sg">
+        <div class="card lg sc"><div class="sc-i">🧑‍💼</div><div class="sc-n cg" id="hR">—</div><div class="sc-l">Resellers</div><div class="sc-g">🧑‍💼</div></div>
+        <div class="card lc sc"><div class="sc-i">👥</div><div class="sc-n cc" id="hC">—</div><div class="sc-l">Clients</div><div class="sc-g">👥</div></div>
+        <div class="card lgr sc"><div class="sc-i">✅</div><div class="sc-n cgr" id="hP">—</div><div class="sc-l">Paid</div><div class="sc-g">✅</div></div>
+        <div class="card lp sc"><div class="sc-i">📬</div><div class="sc-n cp" id="hRQ">—</div><div class="sc-l">Requests</div><div class="sc-g">📬</div></div>
+      </div>
+      <div class="card lg" style="margin-bottom:.9rem">
+        <div class="rev-row"><span class="rl">Monthly Revenue</span><span class="rv" id="hRevM">—</span></div>
+        <div class="rev-row"><span class="rl">Setup Revenue</span><span class="rv" id="hRevS">—</span></div>
+        <div class="rev-row"><span class="rl" style="color:var(--g2);font-weight:600">Total Estimated</span><span class="rv big" id="hRevT">—</span></div>
+      </div>
+      <div class="sh"><div class="sht">🛍️ Marketplace</div><button class="btn bg-ghost bsm" onclick="gp('market')">All →</button></div>
+      <div class="sg" style="grid-template-columns:1fr 1fr">
+        <div class="card lp sc"><div class="sc-i">🛍️</div><div class="sc-n cp" id="hProd">—</div><div class="sc-l">Listings</div><div class="sc-g">🛍️</div></div>
+        <div class="card lgr sc"><div class="sc-i">👤</div><div class="sc-n cgr" id="hSellers">—</div><div class="sc-l">Sellers</div><div class="sc-g">👤</div></div>
+      </div>
+      <div class="sh"><div class="sht">📬 Pending Requests</div></div>
+      <div class="card" id="dashReqs"><div class="empty"><div class="empty-i">⏳</div></div></div>
+    </div>
+
+    <!-- RESELLERS -->
+    <div class="pg" id="pg-res">
+      <div class="sh"><div class="sht">🧑‍💼 Resellers</div><button class="btn bg-gold bsm" onclick="oM('moAR')">➕ Add</button></div>
+      <div class="srch-wrap"><span class="srch-ic">🔍</span><input class="srch" id="resFilter" placeholder="Naam ya phone..." oninput="filterRes()"></div>
+      <div class="card" id="resList"><div class="empty"><div class="empty-i">⏳</div></div></div>
+    </div>
+
+    <!-- REQUESTS -->
+    <div class="pg" id="pg-reqs">
+      <div class="sh"><div class="sht">📬 Join Requests</div></div>
+      <div class="card" id="reqList"><div class="empty"><div class="empty-i">⏳</div></div></div>
+    </div>
+
+    <!-- MARKETPLACE MODERATION -->
+    <div class="pg" id="pg-market">
+      <div class="sh"><div class="sht">🛍️ Marketplace Listings</div></div>
+      <div class="srch-wrap"><span class="srch-ic">🔍</span><input class="srch" id="prodFilter" placeholder="Title ya seller..." oninput="filterProd()"></div>
+      <div class="card" id="prodAdminList"><div class="empty"><div class="empty-i">⏳</div></div></div>
+    </div>
+
+    <!-- MONITOR -->
+    <div class="pg" id="pg-mon">
+      <div class="sh"><div class="sht">📊 Network Monitor</div></div>
+      <div class="card lg" style="margin-bottom:.9rem" id="monCard"><div class="empty"><div class="empty-i">📊</div></div></div>
+      <div class="sh"><div class="sht">🏆 Top Resellers</div></div>
+      <div class="card" id="topList"><div class="empty"><div class="empty-i">⏳</div></div></div>
+    </div>
+
+    <!-- CHAT -->
+    <div class="pg no-pad" id="pg-chat">
+      <div class="chat-shell">
+        <div class="chat-hdr">
+          <div class="mav mav-g" style="width:32px;height:32px">👑</div>
+          <div style="flex:1">
+            <div style="font-weight:700;font-size:.86rem" id="chatHdrNm">Reseller Select Karo</div>
+            <div style="font-size:.65rem;color:var(--t2)">Admin Full Control · Edit & Delete Messages ✓</div>
+          </div>
+          <label style="background:rgba(255,255,255,.06);border:1px solid var(--bd);border-radius:var(--r3);padding:.3rem .5rem;cursor:pointer;font-size:.72rem;color:var(--t2)" for="imgUp">🖼️</label>
+          <input type="file" id="imgUp" accept="image/*" style="display:none" onchange="sendImg()">
+        </div>
+        <div class="chat-subhdr" id="rselBtns"><span style="font-size:.72rem;color:var(--t2);padding:.3rem">Loading resellers...</span></div>
+        <div class="chat-msgs" id="chatMsgs"><div style="text-align:center;color:var(--t2);padding:2.5rem;font-size:.78rem">Reseller select karein 💬</div></div>
+        <div class="chat-foot">
+          <textarea class="chat-ta" id="chatIn" placeholder="Reseller ko message..." rows="1" oninput="arSz(this)" onkeydown="ckSend(event)"></textarea>
+          <button class="btn bg-gold sbtn" onclick="sChat()">➤</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI -->
+    <div class="pg no-pad" id="pg-ai">
+      <div class="chat-shell">
+        <div class="chat-hdr">
+          <div class="mav mav-p" style="width:32px;height:32px">🧠</div>
+          <div style="flex:1"><div style="font-weight:700;font-size:.86rem">Mi AI</div><div style="font-size:.65rem;color:var(--p)" id="aiModelLbl">Groq · Mini Model</div></div>
+          <button class="btn bg-ghost bsm" onclick="clrAI()">🗑</button>
+        </div>
+        <div class="model-sw">
+          <button class="model-btn on" id="mdl-mini" onclick="setAIModel('mini')">⚡ MINI · Fast</button>
+          <button class="model-btn" id="mdl-long" onclick="setAIModel('long')">🧠 LONG · Smart</button>
+        </div>
+        <div class="chat-msgs" id="aiMsgs"></div>
+        <div class="chat-foot">
+          <textarea class="chat-ta" id="aiIn" placeholder="Admin mode — kuch bhi poochho..." rows="1" oninput="arSz(this)" onkeydown="akSend(event)"></textarea>
+          <button class="btn bg-purple sbtn" onclick="sAI()">➤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bnav">
+    <button class="bni on" data-pg="home" onclick="gp('home')"><span class="bni-ic">🏠</span><span class="bni-lb">Home</span></button>
+    <button class="bni" data-pg="res" onclick="gp('res')"><span class="bni-ic">🧑‍💼</span><span class="bni-lb">Sellers</span></button>
+    <button class="bni" data-pg="reqs" onclick="gp('reqs')"><span class="bni-ic" style="position:relative">📬<span class="req-dot" id="rdot"></span></span><span class="bni-lb">Requests</span></button>
+    <button class="bni" data-pg="market" onclick="gp('market')"><span class="bni-ic">🛍️</span><span class="bni-lb">Market</span></button>
+    <button class="bni" data-pg="mon" onclick="gp('mon')"><span class="bni-ic">📊</span><span class="bni-lb">Monitor</span></button>
+    <button class="bni" data-pg="chat" onclick="gp('chat')"><span class="bni-ic">💬</span><span class="bni-lb">Chat</span></button>
+    <button class="bni" data-pg="ai" onclick="gp('ai')"><span class="bni-ic">🧠</span><span class="bni-lb">Mi AI</span></button>
+  </div>
+</div>
+
+<script src="js/sounds.js"></script>
+<script type="module" src="js/admin-app.js"></script>
+<style>@keyframes scur{0%,100%{opacity:1}50%{opacity:0}}</style>
+</body>
+</html>

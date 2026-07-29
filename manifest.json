@@ -1,0 +1,16 @@
+{
+  "name": "Mi Reseller Program",
+  "short_name": "Mi Reseller",
+  "description": "Mi Reseller Program — Join, Earn, Grow. Official reseller portal by Muslim Islam Org.",
+  "start_url": "index.html",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#050a06",
+  "theme_color": "#4ade22",
+  "icons": [
+    { "src": "assets/logo.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/logo.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
