@@ -29,7 +29,7 @@
 .th-btn{width:22px;height:22px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:all .18s var(--spring)}
 .th-btn:active{transform:scale(.85)}.th-btn.on{border-color:var(--t1);transform:scale(1.15)}
 .th-btn[data-t="t-green"]{background:linear-gradient(135deg,#4ade22,#1f8b1a)}.th-btn[data-t="t-royal"]{background:linear-gradient(135deg,#a78bfa,#f472b6)}.th-btn[data-t="t-ocean"]{background:linear-gradient(135deg,#00e5ff,#38bdf8)}.th-btn[data-t="t-rose"]{background:linear-gradient(135deg,#f43f5e,#fb923c)}.th-btn[data-t="t-gold"]{background:linear-gradient(135deg,#f0b429,#b87800)}
-.card-login{width:100%;max-width:400px;background:var(--sf);backdrop-filter:blur(28px) saturate(160%);-webkit-backdrop-filter:blur(28px) saturate(160%);border:1px solid var(--bd);border-radius:var(--r1);box-shadow:0 20px 60px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);position:relative;overflow:hidden;animation:cardIn .5s .1s var(--spring) both}
+.card-login{width:100%;max-width:400px;background:var(--sf);backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);border:1px solid var(--bd);border-radius:var(--r1);box-shadow:0 20px 60px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);position:relative;overflow:hidden;animation:cardIn .5s .1s var(--spring) both}
 @keyframes cardIn{from{opacity:0;transform:scale(.9) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
 .card-login::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--g),var(--c),transparent)}
 .card-body{padding:1.7rem}
@@ -75,6 +75,7 @@
         <div class="fg"><label class="fl">Phone Number</label><span class="fic">📞</span><input class="fi" type="tel" id="lP" placeholder="03XX-XXXXXXX" inputmode="tel"></div>
         <div class="fg"><label class="fl">Password</label><span class="fic">🔑</span><input class="fi" type="password" id="lW" placeholder="••••••••"></div>
         <button class="btn bg-gold bfull" id="lBtn" onclick="doLogin()" style="padding:.82rem;font-family:'Orbitron',monospace;font-size:.74rem;letter-spacing:2.5px">LOGIN KAREIN</button>
+        <a href="javascript:void(0)" onclick="oM('moForgot')" style="display:block;text-align:center;margin-top:.65rem;color:var(--t2);font-size:.72rem;text-decoration:none">🔑 Password bhool gaye?</a>
         <div class="divider">YA</div>
         <button class="btn btn-google bfull" style="padding:.82rem" onclick="doGoogleLogin()">
           <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
@@ -101,8 +102,11 @@
         <div class="fg"><label class="fl">City</label><span class="fic">📍</span><input class="fi" id="rC" placeholder="Lahore, Karachi..."></div>
 
         <div class="fg" style="margin-bottom:.5rem">
-          <label class="fl">📍 Location (Maps se select karein)</label>
-          <button type="button" class="btn bg-ghost bfull bsm" onclick="openLocationModal()" id="locPickBtn">📍 Location Select Karein</button>
+          <label class="fl">📍 Location</label>
+          <div style="display:flex;gap:.4rem">
+            <button type="button" class="btn bg-ghost bsm" style="flex:1" onclick="useGPSLocation()" id="gpsBtnReg">📡 GPS Se Location Lein (Auto)</button>
+            <button type="button" class="btn bg-ghost bsm" style="flex:1" onclick="openLocationModal()" id="locPickBtn">🗺️ Maps Se Select Karein</button>
+          </div>
           <div id="locPreview" style="font-size:.7rem;color:var(--t2);margin-top:.4rem;display:none"></div>
         </div>
 
@@ -125,30 +129,43 @@
   </div>
 </div>
 
+<!-- Forgot Password modal -->
+<div class="mo-ov" id="moForgot">
+  <div class="mo-box">
+    <div class="mo-hd"><div class="mo-ttl">🔑 Password Reset Karein</div><button class="mo-cl" onclick="cM('moForgot')">✕</button></div>
+    <div class="mo-body">
+      <div style="background:rgba(61,220,151,.06);border:1px solid rgba(61,220,151,.18);border-radius:var(--r3);padding:.65rem .9rem;font-size:.76rem;color:var(--t2);line-height:1.65;margin-bottom:.95rem">ℹ️ Apna Google/reseller account email daalein — hum ek reset link bhejein ge (sirf un accounts ke liye kaam karta he jo email se Google/Firebase login use karte hain).</div>
+      <div class="alert ae" id="fpErr"></div>
+      <div class="alert ao" id="fpOk"></div>
+      <div class="fg"><label class="fl">Email</label><span class="fic">📧</span><input class="fi" type="email" id="fpEmail" placeholder="email@example.com"></div>
+      <button class="btn bg-gold bfull" id="fpBtn" onclick="doForgotPassword()" style="padding:.78rem">📧 Reset Link Bhejein</button>
+    </div>
+  </div>
+</div>
+
 <script src="js/sounds.js"></script>
 <script type="module">
 'use strict';
-import { initializeApp, getApp } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js';
-import { getDatabase, ref, get, push } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js';
-import { getAuth, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js';
-import { FB, APP_NAME } from './js/config.js';
+import { ref, get, push } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js';
+import { db, googleLogin, forgotPassword, watchAuthState } from './js/auth.js';
 import { uploadToImgBB } from './js/imgbb.js';
-import { mountLocationPicker } from './js/location-picker.js';
+import { mountLocationPicker, getGPSLocation } from './js/location-picker.js';
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
-
-// Already-logged-in redirect
-try {
-  const s = JSON.parse(localStorage.getItem('mi_s') || 'null');
-  if (s && s.id) { sessionStorage.setItem('ms', JSON.stringify(s)); location.href = s.role === 'admin' ? 'admin.html' : 'dashboard.html'; }
-} catch (e) { localStorage.removeItem('mi_s'); }
 
 const THEME_NAMES = { 't-green': 'Mi Green', 't-royal': 'Royal Purple', 't-ocean': 'Deep Ocean', 't-rose': 'Rose Fire', 't-gold': 'Gold' };
 window.setTheme = t => { document.body.className = t; localStorage.setItem('mi_theme', t); document.querySelectorAll('.th-btn').forEach(b => b.classList.toggle('on', b.dataset.t === t)); };
 window.setTheme(localStorage.getItem('mi_theme') || 't-green');
 
-let app; try { app = getApp(); } catch (e) { app = initializeApp(FB); }
-const db = getDatabase(app), auth = getAuth(app);
+// Real session check: fires on load AND whenever Firebase's auth token
+// refreshes/expires, not just a one-time localStorage read.
+let authChecked = false;
+watchAuthState((session) => {
+  if (session && session.id) {
+    if (!authChecked) location.replace(session.role === 'admin' ? 'admin.html' : 'dashboard.html');
+  }
+  authChecked = true;
+});
 
 window.addEventListener('load', () => setTimeout(() => document.getElementById('ldr').classList.add('hide'), 900));
 
@@ -197,13 +214,13 @@ avInput.addEventListener('change', async () => {
   } catch (e) { window.showToast('❌ ' + e.message, 'err', 2500); }
 });
 
-// ---- Register location picker ----
-let regLocation = null, mapMounted = false;
+// ---- Register location picker (Maps tap/drag + direct GPS) ----
+let regLocation = null, mapMounted = false, regMapHandle = null;
 window.openLocationModal = async () => {
   window.oM('moLoc');
   if (!mapMounted) {
     mapMounted = true;
-    await mountLocationPicker(document.getElementById('mapPickerBox'), null, (pos) => { regLocation = pos; });
+    regMapHandle = await mountLocationPicker(document.getElementById('mapPickerBox'), null, (pos) => { regLocation = pos; });
   }
 };
 window.confirmLocation = () => {
@@ -214,8 +231,44 @@ window.confirmLocation = () => {
   }
   window.cM('moLoc');
 };
+window.useGPSLocation = async () => {
+  const btn = document.getElementById('gpsBtnReg');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spin-sm"></span>GPS se location le rahe hain...'; }
+  try {
+    const pos = await getGPSLocation();
+    regLocation = pos;
+    document.getElementById('locPreview').style.display = 'block';
+    document.getElementById('locPreview').textContent = '📍 ' + pos.address;
+    document.getElementById('locPickBtn').textContent = '✅ Location Set (GPS)';
+    playSound('success'); window.showToast('✅ GPS location mil gayi!', 'ok', 2000);
+    if (regMapHandle) regMapHandle.setPosition(pos);
+  } catch (e) {
+    playSound('error'); window.showToast('❌ ' + e.message, 'err', 3000);
+  }
+  if (btn) { btn.disabled = false; btn.innerHTML = '📡 GPS Se Location Lein (Auto)'; }
+};
 
-// ---- Login ----
+// ---- Forgot password ----
+window.doForgotPassword = async () => {
+  const em = document.getElementById('fpEmail').value.trim();
+  const eEl = document.getElementById('fpErr'), oEl = document.getElementById('fpOk'), btn = document.getElementById('fpBtn');
+  eEl.classList.remove('on'); oEl.classList.remove('on');
+  if (!em) { eEl.textContent = '⚠️ Email daalein.'; eEl.classList.add('on'); playSound('error'); return; }
+  btn.disabled = true; btn.innerHTML = '<span class="spin-sm"></span>Bhej rahe hain...';
+  try {
+    await forgotPassword(em);
+    playSound('success');
+    oEl.innerHTML = '✅ Reset link <b>' + em + '</b> pe bhej diya. Email check karein (spam bhi).';
+    oEl.classList.add('on');
+  } catch (e) {
+    playSound('error');
+    eEl.textContent = e.code === 'auth/user-not-found' ? '❌ Is email se koi account nahi mila.' : '❌ ' + e.message;
+    eEl.classList.add('on');
+  }
+  btn.disabled = false; btn.innerHTML = '📧 Reset Link Bhejein';
+};
+
+// ---- Login (phone/password — legacy path, still supported for existing resellers) ----
 window.doLogin = async () => {
   const ph = document.getElementById('lP').value.trim(), pw = document.getElementById('lW').value.trim();
   const eEl = document.getElementById('lE'), btn = document.getElementById('lBtn');
@@ -237,32 +290,25 @@ window.doLogin = async () => {
   }
 };
 
+// ---- Google Login — REAL Firebase Auth, session resolved + persisted by auth.js ----
 window.doGoogleLogin = async () => {
   try {
-    const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
-    const ADMIN_EMAIL = 'muaaziqbal@gmail.com';
-    if (user.email === ADMIN_EMAIL) {
-      const sess = { id: 'ADMIN', name: 'Muaaz Iqbal', role: 'admin', email: user.email, photo: user.photoURL };
-      localStorage.setItem('mi_s', JSON.stringify(sess)); sessionStorage.setItem('ms', JSON.stringify(sess));
-      playSound('success'); window.showToast('✅ Welcome Admin Muaaz!', 'ok');
-      setTimeout(() => location.href = 'admin.html', 650);
+    const user = await googleLogin();
+    const { resolveSession } = await import('./js/auth.js');
+    const session = await resolveSession(user);
+    if (!session) {
+      playSound('error');
+      window.showToast('❌ Is Google email se koi reseller account nahi mila. Pehle register karein.', 'err', 3500);
       return;
     }
-    // Non-admin Google sign-in: check if this email is a registered reseller
-    const snap = await get(ref(db, 'resellers'));
-    let found = null;
-    if (snap.exists()) snap.forEach(child => { const d = child.val(); if (d.email === user.email && d.active !== false) found = { ...d, id: child.key, role: 'reseller' }; });
-    if (found) {
-      localStorage.setItem('mi_s', JSON.stringify(found)); sessionStorage.setItem('ms', JSON.stringify(found));
-      playSound('success'); window.showToast('✅ Welcome, ' + found.name + '!', 'ok');
-      setTimeout(() => location.href = 'dashboard.html', 650);
-    } else {
-      playSound('error');
-      window.showToast('❌ Is email se koi reseller account nahi mila. Pehle register karein.', 'err', 3500);
-    }
-  } catch (e) { playSound('error'); window.showToast('❌ Google login failed.', 'err'); }
+    localStorage.setItem('mi_s', JSON.stringify(session)); sessionStorage.setItem('ms', JSON.stringify(session));
+    playSound('success');
+    window.showToast('✅ Welcome, ' + session.name + '!', 'ok');
+    setTimeout(() => location.href = session.role === 'admin' ? 'admin.html' : 'dashboard.html', 650);
+  } catch (e) {
+    playSound('error');
+    window.showToast(e.code === 'auth/popup-closed-by-user' ? 'Login cancel ho gaya.' : '❌ Google login failed.', 'err');
+  }
 };
 
 window.doReg = async () => {

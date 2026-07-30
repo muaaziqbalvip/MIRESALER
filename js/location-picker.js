@@ -91,5 +91,37 @@ export async function mountLocationPicker(container, initial, onChange) {
     updateAddress(start);
   }
 
-  return { map, marker };
+  return {
+    map, marker,
+    /** Move the map+marker to a given {lat,lng} programmatically (e.g. after GPS lookup). */
+    setPosition(pos) { map.setCenter(pos); marker.setPosition(pos); updateAddress(pos); }
+  };
+}
+
+/**
+ * Direct GPS location — asks the browser for the device's real coordinates
+ * (no map needed) and reverse-geocodes them into a readable address.
+ * Works with or without the Maps picker being open.
+ * @returns {Promise<{lat:number,lng:number,address:string}>}
+ */
+export function getGPSLocation() {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) { reject(new Error('Is device/browser me GPS support nahi he')); return; }
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      const p = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      try {
+        await loadGoogleMaps();
+        const geocoder = new google.maps.Geocoder();
+        const res = await geocoder.geocode({ location: p });
+        const address = res.results?.[0]?.formatted_address || `${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}`;
+        resolve({ lat: p.lat, lng: p.lng, address });
+      } catch (e) {
+        // Maps key missing/unavailable — still return raw coordinates, GPS itself worked.
+        resolve({ lat: p.lat, lng: p.lng, address: `${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}` });
+      }
+    }, (err) => {
+      const msgs = { 1: 'Location permission deny ki gayi. Browser settings se allow karein.', 2: 'Location abhi available nahi.', 3: 'GPS lookup timeout ho gaya, dobara try karein.' };
+      reject(new Error(msgs[err.code] || 'GPS location nahi mil saki.'));
+    }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
+  });
 }

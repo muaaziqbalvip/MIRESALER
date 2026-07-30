@@ -1,23 +1,25 @@
 'use strict';
-import { initializeApp, getApp } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js';
-import { getDatabase, ref, set, get, update, remove, push, onValue, serverTimestamp } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js';
-import { FB, DEFAULT_PAYMENT_METHODS } from './config.js';
+import { ref, set, get, update, remove, push, onValue } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js';
+import { DEFAULT_PAYMENT_METHODS } from './config.js';
+import { db, watchAuthState, logout as authLogout } from './auth.js';
 import { uploadToImgBB, wireImageUpload } from './imgbb.js';
-import { mountLocationPicker } from './location-picker.js';
+import { mountLocationPicker, getGPSLocation } from './location-picker.js';
 import { groqChat } from './groq-ai.js';
 import './pwa-install.js';
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 
-// ---- Session check ----
-const _ss = sessionStorage.getItem('ms') || localStorage.getItem('mi_s');
-if (!_ss) { location.replace('index.html'); }
-let SESSION; try { SESSION = JSON.parse(_ss); } catch (e) { location.replace('index.html'); }
-if (!SESSION?.id) { location.replace('index.html'); }
-const RID = SESSION.id, RNAME = SESSION.name || 'Reseller';
-
-let app; try { app = getApp(); } catch (e) { app = initializeApp(FB); }
-const db = getDatabase(app);
+// ---- Session check (real Firebase Auth session, with legacy phone/password fallback) ----
+let SESSION = null, RID = null, RNAME = 'Reseller', sessionReady = false;
+const bootPromise = new Promise((resolve) => {
+  watchAuthState((session) => {
+    if (!session || !session.id) { location.replace('index.html'); return; }
+    if (session.role === 'admin') { location.replace('admin.html'); return; }
+    SESSION = session; RID = SESSION.id; RNAME = SESSION.name || 'Reseller';
+    if (!sessionReady) { sessionReady = true; resolve(); }
+    else if (window.__miRefreshSessionUI) window.__miRefreshSessionUI();
+  });
+});
 
 // ---- Theme ----
 const THEME_NAMES = { 't-green': 'Mi Green', 't-royal': 'Royal Purple', 't-ocean': 'Deep Ocean', 't-rose': 'Rose Fire', 't-gold': 'Gold' };
@@ -48,9 +50,9 @@ window.cpTxt = (text, btn) => { navigator.clipboard.writeText(text).then(() => {
 function waPost(nm, ph, m3u, uid) { return `🌟 MI RESELLER PROGRAM 🌟\n✅ Account Active!\n\nAssalam o Alaikum!\n*${nm}* aapka account ready hai! 🎉\n\n👤 ${nm}\n📞 ${ph}\n🆔 ${uid}\n🔗 M3U:\n${m3u}\n\n🏢 MUSLIM ISLAM ORG | 👑 Muaaz Iqbal\nShukriya! ❤️`; }
 
 // ============ PIN ============
-const PIN_K = 'mi_pin_' + RID;
-let pBuf = '', savedPIN = localStorage.getItem(PIN_K);
-if (savedPIN) document.getElementById('pinOv').classList.add('on');
+// PIN key is per-reseller (RID), so it's set up once the real Firebase Auth
+// session has resolved — see bootPromise.then() near the bottom of this file.
+let PIN_K = null, pBuf = '', savedPIN = null;
 const PK_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '⌫', '0', '✓'];
 document.getElementById('pgrid').innerHTML = PK_KEYS.map(k => `<button class="pk${k === '⌫' ? ' del' : k === '✓' ? ' ok' : ''}" data-k="${k}">${k}</button>`).join('');
 document.getElementById('pgrid').addEventListener('click', e => { const k = e.target.closest('.pk')?.dataset.k; if (k) doPIN(k); });
@@ -61,6 +63,17 @@ function chkPIN() {
   else { playSound('pinWrong'); for (let i = 0; i < 4; i++) { const d = document.getElementById('pd' + i); if (d) { d.classList.add('er'); d.classList.remove('on'); } } document.getElementById('perr').textContent = '❌ Galat PIN'; pBuf = ''; setTimeout(() => { updDots(); document.getElementById('perr').textContent = ''; }, 1200); }
 }
 window.skipP = () => { if (!savedPIN) { document.getElementById('pinOv').classList.remove('on'); initApp(); } };
+
+// Once the real Firebase Auth session resolves, set up the per-reseller PIN
+// gate and profile avatar wiring (both need RID/SESSION which aren't known
+// until this point), then either show the PIN screen or boot straight in.
+bootPromise.then(() => {
+  PIN_K = 'mi_pin_' + RID;
+  savedPIN = localStorage.getItem(PIN_K);
+  wireProfileAvatarUpload();
+  if (savedPIN) document.getElementById('pinOv').classList.add('on');
+  else initApp();
+});
 
 // ============ STATE ============
 let ALL = {}, aiHistoryMini = [], aiHistoryLong = [], aiModel = 'mini', clientFilter = 'all', chatMode = 'admin', chatWith = null, chatUnsub = null, lastMsgCount = 0, allResellers = {};
@@ -107,22 +120,36 @@ function setAvatarImg(box, url) {
   if (!img) { img = document.createElement('img'); box.insertBefore(img, box.firstChild); const span = box.querySelector('span'); if (span) span.style.display = 'none'; }
   img.src = url;
 }
-wireImageUpload(document.getElementById('proAvatar'), async (url) => {
-  setAvatarImg(document.getElementById('proAvatar'), url);
-  setAvatarImg(document.getElementById('aboutAvatar'), url);
-  await update(ref(db, 'resellers/' + RID), { photo: url, updated_at: Date.now() });
-  SESSION.photo = url; localStorage.setItem('mi_s', JSON.stringify(SESSION)); sessionStorage.setItem('ms', JSON.stringify(SESSION));
-}, SESSION.photo);
+function wireProfileAvatarUpload() {
+  wireImageUpload(document.getElementById('proAvatar'), async (url) => {
+    setAvatarImg(document.getElementById('proAvatar'), url);
+    setAvatarImg(document.getElementById('aboutAvatar'), url);
+    await update(ref(db, 'resellers/' + RID), { photo: url, updated_at: Date.now() });
+    SESSION.photo = url; localStorage.setItem('mi_s', JSON.stringify(SESSION)); sessionStorage.setItem('ms', JSON.stringify(SESSION));
+  }, SESSION.photo);
+}
 
 // ============ PROFILE LOCATION ============
-let proLocation = null, proMapMounted = false;
+let proLocation = null, proMapMounted = false, proMapHandle = null;
 window.openProLocation = async () => {
   window.oM('moLocPro');
-  if (!proMapMounted) { proMapMounted = true; await mountLocationPicker(document.getElementById('mapProBox'), SESSION.location, (pos) => { proLocation = pos; }); }
+  if (!proMapMounted) { proMapMounted = true; proMapHandle = await mountLocationPicker(document.getElementById('mapProBox'), SESSION.location, (pos) => { proLocation = pos; }); }
 };
 window.confirmProLocation = () => {
   if (proLocation) document.getElementById('proLocPreview').textContent = '📍 ' + proLocation.address;
   window.cM('moLocPro');
+};
+window.useGPSLocationPro = async () => {
+  const btn = document.getElementById('gpsBtnPro');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spin-sm"></span>GPS...'; }
+  try {
+    const pos = await getGPSLocation();
+    proLocation = pos;
+    document.getElementById('proLocPreview').textContent = '📍 ' + pos.address + ' (GPS)';
+    playSound('success'); toast('✅ GPS location mil gayi!', 'ok', 2000);
+    if (proMapHandle) proMapHandle.setPosition(pos);
+  } catch (e) { playSound('error'); toast('❌ ' + e.message, 'err', 3000); }
+  if (btn) { btn.disabled = false; btn.innerHTML = '📡 GPS Se'; }
 };
 
 // ============ STATS ============
@@ -584,7 +611,6 @@ window.gp = function (name) {
   const sc = document.getElementById('scrl'); if (sc) sc.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-window.doLogout = () => { playSound('logout'); localStorage.removeItem('mi_s'); sessionStorage.removeItem('ms'); location.replace('index.html'); };
+window.doLogout = () => { playSound('logout'); authLogout(); setTimeout(() => location.replace('index.html'), 200); };
 
-if (!savedPIN) { initApp(); }
 window.addEventListener('load', () => setTimeout(() => document.getElementById('ldr').classList.add('hide'), 500));

@@ -85,7 +85,10 @@ html,body{overflow:hidden}
       <div class="fg"><label class="fl">App PIN (4 digit)</label><span class="fic">🔢</span><input class="fi" type="password" id="pro_pin" placeholder="Naya PIN (khali rakhein — same)" maxlength="4"></div>
       <div class="fg" style="margin-bottom:.3rem">
         <label class="fl">📍 Location</label>
-        <button type="button" class="btn bg-ghost bfull bsm" onclick="openProLocation()">📍 Location Update Karein</button>
+        <div style="display:flex;gap:.4rem">
+          <button type="button" class="btn bg-ghost bsm" style="flex:1" onclick="useGPSLocationPro()" id="gpsBtnPro">📡 GPS Se</button>
+          <button type="button" class="btn bg-ghost bsm" style="flex:1" onclick="openProLocation()">🗺️ Maps Se</button>
+        </div>
         <div id="proLocPreview" style="font-size:.7rem;color:var(--t2);margin-top:.4rem"></div>
       </div>
     </div>

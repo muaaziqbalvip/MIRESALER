@@ -115,12 +115,33 @@ html,body{overflow:hidden}
   <div class="mo-foot" id="moProdAF"></div>
 </div></div>
 
+<!-- Product FULL EDIT (admin can change anything on any reseller's listing) -->
+<div class="mo-ov" id="moProdE"><div class="mo-box">
+  <div class="mo-hd"><div class="mo-ttl">✏️ Listing Edit (Admin)</div><button class="mo-cl" onclick="cM('moProdE')">✕</button></div>
+  <div class="mo-body">
+    <div class="alert ae" id="peErr"></div>
+    <div class="img-up" id="peImgUp" style="margin-bottom:1rem"><span>🖼️ Product Image (tap to change)</span></div>
+    <div class="fg"><label class="fl">Title</label><span class="fic">🏷️</span><input class="fi" id="pe_title"></div>
+    <div class="fg"><label class="fl">Price (Rs)</label><span class="fic">💰</span><input class="fi" type="number" id="pe_price"></div>
+    <div class="fg"><label class="fl">Description</label><span class="fic">📝</span><input class="fi" id="pe_desc"></div>
+    <div class="fg"><label class="fl">Category</label>
+      <select class="fi-sel fi" id="pe_cat" style="padding-left:.95rem">
+        <option>IPTV Subscription</option><option>Device / Hardware</option><option>Accessories</option><option>Service</option><option>Other</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">Seller (reference only)</label><span class="fic">👤</span><input class="fi" id="pe_seller" disabled style="opacity:.6"></div>
+    <input type="hidden" id="pe_id">
+  </div>
+  <div class="mo-foot"><button class="btn bg-ghost bsm" onclick="cM('moProdE')">Cancel</button><button class="btn bg-gold bsm" onclick="saveAdminProductEdit()">💾 Save Changes</button></div>
+</div></div>
+
 <!-- Settings -->
 <div class="mo-ov" id="moSet"><div class="mo-box">
   <div class="mo-hd"><div class="mo-ttl">⚙️ Settings</div><button class="mo-cl" onclick="cM('moSet')">✕</button></div>
   <div class="mo-body">
     <div class="fg"><label class="fl">Admin PIN Change</label><input class="fi" id="set_pin" placeholder="4 digit naya PIN" maxlength="4" type="password" style="padding-left:.95rem"></div>
     <button class="btn bg-gold bsm bfull" onclick="changePIN()" style="margin-bottom:1.1rem">🔑 PIN Badlein</button>
+    <button class="btn bg-red bsm bfull" onclick="doAdminLogout()" style="margin-bottom:1.1rem">🚪 Logout (Google Session Bhi End Karein)</button>
 
     <div style="font-family:'Orbitron',monospace;font-size:.54rem;letter-spacing:2px;color:var(--t2);margin-bottom:.5rem">THEME</div>
     <div style="text-align:center;margin-bottom:1.1rem">

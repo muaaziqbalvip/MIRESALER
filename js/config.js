@@ -47,6 +47,9 @@ export const APP_SHORT = "Mi Reseller";
 export const APP_TAGLINE = "JOIN · EARN · GROW";
 export const LOGO_PATH = "assets/logo.png";
 
+// ---- Admin identity (used by real Firebase Auth session checks) ----
+export const ADMIN_EMAIL = "muaaziqbal@gmail.com";
+
 // ---- Payment destinations (admin edits these in Admin Panel → Settings, stored in Firebase) ----
 export const DEFAULT_PAYMENT_METHODS = {
   jazzcash: { enabled: true, number: "03XX-XXXXXXX", name: "Muaaz Iqbal" },

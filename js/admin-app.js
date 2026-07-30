@@ -1,24 +1,26 @@
 'use strict';
-import { initializeApp, getApp } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js';
-import { getDatabase, ref, set, get, update, remove, push, onValue } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js';
-import { getAuth, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js';
-import { FB, DEFAULT_PAYMENT_METHODS } from './config.js';
+import { ref, set, get, update, remove, push, onValue } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js';
+import { DEFAULT_PAYMENT_METHODS, ADMIN_EMAIL } from './config.js';
+import { db, googleLogin, watchAuthState, logout as authLogout } from './auth.js';
 import { uploadToImgBB } from './imgbb.js';
-import { mountLocationPicker } from './location-picker.js';
+import { mountLocationPicker, getGPSLocation } from './location-picker.js';
 import { groqChat } from './groq-ai.js';
 import './pwa-install.js';
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 
-let app; try { app = getApp(); } catch (e) { app = initializeApp(FB); }
-const db = getDatabase(app), auth = getAuth(app);
-
-const ADMIN_EMAIL = 'muaaziqbal@gmail.com';
+// ---- Real auth gate ----
+// Google Sign-In (matched against ADMIN_EMAIL) is now the ACTUAL access
+// control — a real Firebase Auth session, checked on every load via
+// onAuthStateChanged. The 4-digit PIN below is only a fast local re-lock
+// for convenience on a device that's already authenticated; it can never
+// grant access on its own.
 const PIN_KEY = 'mi_admin_pin_v1';
 let savedPIN = localStorage.getItem(PIN_KEY) || '1234';
 let pBuf = '', RES = {}, CLIENTS = {}, REQS = {}, PRODUCTS = {}, chatWith = null, chatUnsub = null;
 let aiHistoryMini = [], aiHistoryLong = [], aiModel = 'mini';
 let paymentMethods = JSON.parse(JSON.stringify(DEFAULT_PAYMENT_METHODS));
+let adminAuthed = false; // true only once Firebase confirms the real admin session
 
 // ---- Theme ----
 const THEME_NAMES = { 't-green': 'Mi Green', 't-royal': 'Royal Purple', 't-ocean': 'Deep Ocean', 't-rose': 'Rose Fire', 't-gold': 'Gold' };
@@ -47,26 +49,58 @@ function gUID(p) { const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let r = ''; for
 window.arSz = el => { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 88) + 'px'; };
 window.cpTxt = (t, b) => { navigator.clipboard.writeText(t).then(() => { toast('📋 Copied!', 'ok', 1800); if (b) { const o = b.innerHTML; b.innerHTML = '✅'; b.classList.add('done'); setTimeout(() => { b.innerHTML = o; b.classList.remove('done'); }, 2000); } }).catch(() => toast('Copy error', 'err')); };
 
-// ============ PIN ============
+// ============ REAL AUTH STATE (Google Sign-In, admin-only) ============
+// This is the actual gate: watchAuthState fires on every load/refresh with
+// the current Firebase session (or null). Only a confirmed admin session
+// unlocks the PIN screen's PIN-entry path at all — the PIN never works
+// without this having fired true first.
+const pinScreen = document.getElementById('pinOv');
+watchAuthState((session, fbUser) => {
+  if (session && session.role === 'admin') {
+    adminAuthed = true;
+    document.getElementById('perr').textContent = '';
+    // Already-authenticated admin returning: show PIN quick-unlock instead
+    // of forcing Google popup again (their Firebase session is still valid).
+    if (!pinScreen.classList.contains('unlocked-once')) {
+      pinScreen.classList.add('on');
+    }
+  } else {
+    adminAuthed = false;
+    pinScreen.classList.add('on');
+    document.getElementById('perr').textContent = fbUser ? '⚠️ Yeh Google account admin nahi he.' : '';
+  }
+});
+
+// ============ PIN (local quick-unlock, only meaningful after real auth) ============
 const PK_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '⌫', '0', '✓'];
 document.getElementById('pgrid').innerHTML = PK_KEYS.map(k => `<button class="pk${k === '⌫' ? ' del' : k === '✓' ? ' ok' : ''}" data-k="${k}">${k}</button>`).join('');
 document.getElementById('pgrid').addEventListener('click', e => { const k = e.target.closest('.pk')?.dataset.k; if (k) doPIN(k); });
 function doPIN(k) { playSound('pin'); if (k === '⌫') pBuf = pBuf.slice(0, -1); else if (k === '✓') { chkPIN(); return; } else if (pBuf.length < 4) pBuf += k; updDots(); if (pBuf.length === 4) setTimeout(chkPIN, 120); }
 function updDots() { for (let i = 0; i < 4; i++) { const d = document.getElementById('pd' + i); if (d) { d.classList.toggle('on', i < pBuf.length); d.classList.remove('er'); } } }
 function chkPIN() {
-  if (pBuf === savedPIN) { playSound('pinOk'); document.getElementById('pinOv').classList.remove('on'); initAdmin(); }
+  if (!adminAuthed) { playSound('pinWrong'); document.getElementById('perr').textContent = '❌ Pehle Google se admin login karein.'; pBuf = ''; updDots(); return; }
+  if (pBuf === savedPIN) { playSound('pinOk'); pinScreen.classList.remove('on'); pinScreen.classList.add('unlocked-once'); initAdmin(); }
   else { playSound('pinWrong'); for (let i = 0; i < 4; i++) { const d = document.getElementById('pd' + i); if (d) { d.classList.add('er'); d.classList.remove('on'); } } document.getElementById('perr').textContent = '❌ Galat PIN'; pBuf = ''; setTimeout(() => { updDots(); document.getElementById('perr').textContent = ''; }, 1200); }
 }
 window.changePIN = () => { const np = document.getElementById('set_pin').value.trim(); if (np.length !== 4 || isNaN(np)) { toast('4 digit PIN daalo', 'err'); return; } savedPIN = np; localStorage.setItem(PIN_KEY, np); toast('✅ PIN updated!', 'ok'); document.getElementById('set_pin').value = ''; cM('moSet'); };
 
 window.doGoogleAdminLogin = async () => {
   try {
-    const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    if (result.user.email === ADMIN_EMAIL) { playSound('pinOk'); document.getElementById('pinOv').classList.remove('on'); toast('✅ Welcome Admin Muaaz!', 'ok', 2000); setTimeout(initAdmin, 300); }
-    else { playSound('pinWrong'); toast('❌ Sirf admin email allowed', 'err'); }
+    const user = await googleLogin();
+    if (user.email === ADMIN_EMAIL) {
+      adminAuthed = true; playSound('pinOk');
+      pinScreen.classList.remove('on'); pinScreen.classList.add('unlocked-once');
+      toast('✅ Welcome Admin Muaaz!', 'ok', 2000);
+      setTimeout(initAdmin, 300);
+    } else {
+      playSound('pinWrong');
+      toast('❌ Sirf admin email allowed. Yeh account admin nahi he.', 'err', 3500);
+      document.getElementById('perr').textContent = '⚠️ Sirf admin Google account allowed.';
+    }
   } catch (e) { playSound('error'); toast('Google error: ' + e.message, 'err'); }
 };
+
+window.doAdminLogout = () => { playSound('logout'); authLogout(); adminAuthed = false; setTimeout(() => location.reload(), 200); };
 
 // ============ INIT ============
 async function initAdmin() {
@@ -282,13 +316,69 @@ window.openProdAdmin = function (pid) {
     <div class="dr"><div class="dl">Details</div><div class="dv" style="color:var(--t2)">${esc(p.desc || '—')}</div></div>
     <div class="dr"><div class="dl">Seller</div><div class="dv">${esc(p.sellerName || '—')}</div></div>
     <div class="dr"><div class="dl">Posted</div><div class="dv" style="font-size:0.78rem;color:var(--t2)">${tFull(p.created_at)}</div></div>`;
-  document.getElementById('moProdAF').innerHTML = `<button class="btn bg-ghost bsm" onclick="cM('moProdA')">Close</button><button class="btn bg-red bsm" onclick="adminRemoveProduct('${pid}')">🗑 Remove Listing</button>`;
+  document.getElementById('moProdAF').innerHTML = `<button class="btn bg-ghost bsm" onclick="cM('moProdA')">Close</button><button class="btn bg-orange bsm" onclick="openAdminProductEdit('${pid}')">✏️ Edit</button><button class="btn bg-red bsm" onclick="adminRemoveProduct('${pid}')">🗑 Remove</button>`;
   oM('moProdA');
 };
 window.adminRemoveProduct = async function (pid) {
   if (!confirm('Yeh listing remove karein?')) return;
   await update(ref(db, 'products/' + pid), { status: 'removed', removed_by: 'admin', removed_at: Date.now() });
   toast('Listing removed.', 'info'); playSound('error'); cM('moProdA');
+};
+
+// ---- Admin FULL EDIT of any reseller's listing (title/price/desc/category/image) ----
+let peImgUrl = '';
+function wirePeImgUpload() {
+  const box = document.getElementById('peImgUp');
+  if (box.dataset.wired) return; // only wire the file input once
+  box.dataset.wired = '1';
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = 'image/*'; input.style.display = 'none';
+  box.appendChild(input);
+  box.addEventListener('click', (e) => { if (e.target !== input) input.click(); });
+  input.addEventListener('change', async () => {
+    const file = input.files[0]; if (!file) return;
+    const localUrl = URL.createObjectURL(file);
+    let img = box.querySelector('img');
+    if (!img) { img = document.createElement('img'); box.appendChild(img); }
+    img.src = localUrl;
+    const span = box.querySelector('span'); if (span) span.style.display = 'none';
+    try {
+      const res = await uploadToImgBB(file);
+      peImgUrl = res.url;
+      toast('✅ Image updated!', 'ok', 1600); playSound('upload');
+    } catch (e) { toast('❌ ' + e.message, 'err', 2500); }
+  });
+}
+window.openAdminProductEdit = function (pid) {
+  const p = PRODUCTS[pid]; if (!p) return;
+  cM('moProdA');
+  wirePeImgUpload();
+  document.getElementById('pe_id').value = pid;
+  document.getElementById('pe_title').value = p.title || '';
+  document.getElementById('pe_price').value = p.price || '';
+  document.getElementById('pe_desc').value = p.desc || '';
+  document.getElementById('pe_cat').value = p.category || 'Other';
+  document.getElementById('pe_seller').value = (p.sellerName || '—') + ' (' + (p.sellerId || '—') + ')';
+  peImgUrl = p.image || '';
+  const box = document.getElementById('peImgUp');
+  let img = box.querySelector('img');
+  if (peImgUrl) { if (!img) { img = document.createElement('img'); box.appendChild(img); } img.src = peImgUrl; const span = box.querySelector('span'); if (span) span.style.display = 'none'; }
+  else { if (img) img.remove(); const span = box.querySelector('span'); if (span) span.style.display = 'flex'; }
+  document.getElementById('peErr').classList.remove('on');
+  oM('moProdE');
+};
+window.saveAdminProductEdit = async function () {
+  const pid = document.getElementById('pe_id').value;
+  const title = document.getElementById('pe_title').value.trim();
+  const price = parseFloat(document.getElementById('pe_price').value);
+  const desc = document.getElementById('pe_desc').value.trim();
+  const cat = document.getElementById('pe_cat').value;
+  const eEl = document.getElementById('peErr'); eEl.classList.remove('on');
+  if (!title || !price) { eEl.textContent = '⚠️ Title aur price zaroori.'; eEl.classList.add('on'); playSound('error'); return; }
+  try {
+    await update(ref(db, 'products/' + pid), { title, price, desc, category: cat, image: peImgUrl, edited_by_admin: true, updated_at: Date.now() });
+    playSound('success'); toast('✅ Listing admin ne update kar di!', 'ok'); cM('moProdE');
+  } catch (e) { eEl.textContent = 'Error: ' + e.message; eEl.classList.add('on'); playSound('error'); }
 };
 
 // ============ PAYMENT METHODS SETTINGS ============
