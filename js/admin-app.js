@@ -94,10 +94,24 @@ window.doGoogleAdminLogin = async () => {
       setTimeout(initAdmin, 300);
     } else {
       playSound('pinWrong');
-      toast('❌ Sirf admin email allowed. Yeh account admin nahi he.', 'err', 3500);
+      toast('❌ Sirf admin email allowed (' + ADMIN_EMAIL + '). Aap login hue: ' + user.email, 'err', 5000);
       document.getElementById('perr').textContent = '⚠️ Sirf admin Google account allowed.';
     }
-  } catch (e) { playSound('error'); toast('Google error: ' + e.message, 'err'); }
+  } catch (e) {
+    playSound('error');
+    console.error('Admin Google login error:', e.code, e.message);
+    const msgs = {
+      'auth/popup-closed-by-user': 'Login popup band kar diya gaya.',
+      'auth/cancelled-popup-request': 'Login cancel ho gaya, dobara try karein.',
+      'auth/popup-blocked': '❌ Browser ne popup block kar diya. Popup-blocker off karein.',
+      'auth/unauthorized-domain': '❌ Yeh domain (' + location.hostname + ') Firebase Console me authorize nahi he. Authentication → Settings → Authorized domains me add karein.',
+      'auth/operation-not-allowed': '❌ Google Sign-In Firebase Console me enable nahi he. Authentication → Sign-in method → Google ko Enable karein.',
+      'auth/network-request-failed': '❌ Internet/network error.',
+      'auth/invalid-api-key': '❌ Firebase API key ghalat he. js/config.js check karein.',
+      'auth/configuration-not-found': '❌ Firebase Authentication is project me setup nahi he. Firebase Console → Authentication → Get Started dabayein.'
+    };
+    toast(msgs[e.code] || ('❌ Google error: ' + (e.code || e.message)), 'err', 6000);
+  }
 };
 
 window.doAdminLogout = () => { playSound('logout'); authLogout(); adminAuthed = false; setTimeout(() => location.reload(), 200); };

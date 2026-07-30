@@ -11,7 +11,8 @@ export const FB = {
   projectId: "ramadan-2385b",
   storageBucket: "ramadan-2385b.firebasestorage.app",
   messagingSenderId: "882828936310",
-  appId: "1:882828936310:web:7f97b921031fe130fe4b57"
+  appId: "1:882828936310:web:7f97b921031fe130fe4b57",
+  measurementId: "G-FWXBNG4RNT"
 };
 
 // ---- ImgBB (image hosting for profile pics + product images) ----
